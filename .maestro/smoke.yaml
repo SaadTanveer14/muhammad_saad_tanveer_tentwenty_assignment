@@ -1,0 +1,6 @@
+# Milestone 6 grows this into: list → detail → trailer → back → seats.
+appId: com.cinebook
+---
+- launchApp
+- assertVisible:
+    id: movie-list-screen
