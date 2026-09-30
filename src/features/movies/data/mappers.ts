@@ -1,32 +1,34 @@
-import { imageUrl, type ImageSize } from '../../../core/api';
 import type { ImageSource } from '../../../core/types';
+import {
+  buildImageUrl,
+  tmdbConfig,
+  type MovieDetailsDto,
+  type MovieImagesDto,
+  type MoviePageDto,
+  type MovieSummaryDto,
+  type MovieVideosDto,
+  type TmdbImageSize,
+} from '../../../services/tmdb';
 import type { Movie, MovieDetail, Page, Video } from '../domain/types';
-import type {
-  ImagesDto,
-  MovieDetailDto,
-  MovieDto,
-  MoviePageDto,
-  VideosDto,
-} from './dto';
 
 const emptyToNull = (value: string | null | undefined) => value || null;
 
-function tmdbImage(
+function image(
   path: string | null | undefined,
-  size: ImageSize,
+  size: TmdbImageSize,
 ): ImageSource | null {
-  const uri = imageUrl(emptyToNull(path), size);
+  const uri = buildImageUrl(path, size);
   return uri ? { uri } : null;
 }
 
-export function toMovie(dto: MovieDto): Movie {
+export function toMovie(dto: MovieSummaryDto): Movie {
   return {
     id: dto.id,
     title: dto.title,
     overview: dto.overview,
     releaseDate: emptyToNull(dto.release_date),
-    poster: tmdbImage(dto.poster_path, 'w500'),
-    backdrop: tmdbImage(dto.backdrop_path, 'w780'),
+    poster: image(dto.poster_path, tmdbConfig.imageSizes.poster),
+    backdrop: image(dto.backdrop_path, tmdbConfig.imageSizes.backdrop),
     voteAverage: dto.vote_average,
     genreIds: dto.genre_ids,
   };
@@ -41,35 +43,47 @@ export function toMoviePage(dto: MoviePageDto): Page<Movie> {
   };
 }
 
+/**
+ * Details are the source of truth; the images response only fills in a
+ * backdrop when the details have none.
+ */
 export function toMovieDetail(
-  dto: MovieDetailDto,
-  images?: ImagesDto,
+  dto: MovieDetailsDto,
+  images: MovieImagesDto | null,
 ): MovieDetail {
-  const logo =
-    images?.logos.find(l => l.iso_639_1 === 'en') ?? images?.logos[0];
+  const backdropPath =
+    emptyToNull(dto.backdrop_path) ?? images?.backdrops[0]?.file_path;
   return {
     id: dto.id,
     title: dto.title,
     overview: dto.overview,
     releaseDate: emptyToNull(dto.release_date),
-    poster: tmdbImage(dto.poster_path, 'w500'),
-    backdrop: tmdbImage(dto.backdrop_path, 'w780'),
+    poster: image(dto.poster_path, tmdbConfig.imageSizes.poster),
+    backdrop: image(backdropPath, tmdbConfig.imageSizes.backdrop),
     voteAverage: dto.vote_average,
     genres: dto.genres,
     runtimeMinutes: dto.runtime ?? null,
     tagline: emptyToNull(dto.tagline),
-    logo: tmdbImage(logo?.file_path, 'w500'),
+    // Title artwork isn't part of the documented images contract.
+    logo: null,
   };
 }
 
-export function toVideos(dto: VideosDto): Video[] {
-  return dto.results.map(v => ({
-    id: v.id,
-    key: v.key,
-    name: v.name,
-    site: v.site,
-    type: v.type,
-    official: v.official,
-    publishedAt: v.published_at ?? null,
-  }));
+/** Videos without a key can't be played, so they're dropped here. */
+export function toVideos(dto: MovieVideosDto): Video[] {
+  return dto.results.flatMap(v =>
+    v.key
+      ? [
+          {
+            id: v.id,
+            key: v.key,
+            name: v.name,
+            site: v.site,
+            type: v.type,
+            official: v.official,
+            publishedAt: v.published_at ?? null,
+          },
+        ]
+      : [],
+  );
 }

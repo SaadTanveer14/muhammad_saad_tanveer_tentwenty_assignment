@@ -1,7 +1,8 @@
 import { type Query, QueryClient } from '@tanstack/react-query';
 import type { PersistQueryClientOptions } from '@tanstack/react-query-persist-client';
 
-import { apiConfig, isApiError } from '../core/api';
+import { isApiError } from '../core/api';
+import { appConfig } from '../core/config';
 import { queryPersister } from '../core/storage';
 import { cachePolicy } from './cachePolicy';
 
@@ -32,7 +33,7 @@ export function createQueryClient(): QueryClient {
 function shouldPersistQuery(query: Query): boolean {
   // Mock data references bundled images by module id, which changes between
   // bundles, so it must never be written to disk.
-  if (apiConfig.useMockData) {
+  if (appConfig.useMockData) {
     return false;
   }
   if (query.state.status !== 'success') {
@@ -51,6 +52,6 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: cachePolicy.maxAge,
   // Bump when cached data shapes change to discard incompatible caches.
   // Includes the data source so mock data never survives a switch to TMDb.
-  buster: `v3-${apiConfig.useMockData ? 'mock' : 'tmdb'}`,
+  buster: `v3-${appConfig.useMockData ? 'mock' : 'tmdb'}`,
   dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
 };

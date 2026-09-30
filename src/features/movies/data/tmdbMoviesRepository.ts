@@ -1,54 +1,44 @@
-import { httpClient } from '../../../core/api';
-import type { MoviesRepository } from '../domain/MoviesRepository';
+import { isApiError } from '../../../core/api';
 import {
-  genreListDto,
-  imagesDto,
-  movieDetailDto,
-  moviePageDto,
-  videosDto,
-} from './dto';
+  TMDB_MOVIE_GENRES,
+  tmdbClient,
+  tmdbEndpoints,
+} from '../../../services/tmdb';
+import type { MoviesRepository } from '../domain/MoviesRepository';
 import { toMovieDetail, toMoviePage, toVideos } from './mappers';
 
 export const tmdbMoviesRepository: MoviesRepository = {
-  async getUpcoming(page, signal) {
-    const dto = await httpClient.get('/movie/upcoming', {
-      schema: moviePageDto,
-      params: { page, language: 'en-US' },
+  async getUpcoming(query, signal) {
+    const dto = await tmdbClient.request(
+      tmdbEndpoints.upcomingMovies(query),
       signal,
-    });
+    );
     return toMoviePage(dto);
   },
 
   async getDetail(id, signal) {
-    const [detail, images] = await Promise.all([
-      httpClient.get(`/movie/${id}`, {
-        schema: movieDetailDto,
-        params: { language: 'en-US' },
-        signal,
-      }),
-      httpClient.get(`/movie/${id}/images`, {
-        schema: imagesDto,
-        params: { include_image_language: 'en,null' },
-        signal,
-      }),
+    // Independent requests, in parallel. Images are optional: if they fail,
+    // the details still render (cancellation is still propagated).
+    const [details, images] = await Promise.all([
+      tmdbClient.request(tmdbEndpoints.movieDetails(id), signal),
+      tmdbClient
+        .request(tmdbEndpoints.movieImages(id), signal)
+        .catch((error: unknown) => {
+          if (isApiError(error) && error.kind === 'aborted') {
+            throw error;
+          }
+          return null;
+        }),
     ]);
-    return toMovieDetail(detail, images);
+    return toMovieDetail(details, images);
   },
 
   async getVideos(id, signal) {
-    const dto = await httpClient.get(`/movie/${id}/videos`, {
-      schema: videosDto,
-      signal,
-    });
+    const dto = await tmdbClient.request(tmdbEndpoints.movieVideos(id), signal);
     return toVideos(dto);
   },
 
-  async getGenres(signal) {
-    const dto = await httpClient.get('/genre/movie/list', {
-      schema: genreListDto,
-      params: { language: 'en-US' },
-      signal,
-    });
-    return dto.genres;
+  async getGenres() {
+    return TMDB_MOVIE_GENRES.map(g => ({ id: g.id, name: g.name }));
   },
 };

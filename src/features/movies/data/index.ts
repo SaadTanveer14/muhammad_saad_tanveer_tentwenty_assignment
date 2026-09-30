@@ -1,9 +1,9 @@
-import { apiConfig } from '../../../core/api';
+import { appConfig } from '../../../core/config';
 import type { MoviesRepository } from '../domain/MoviesRepository';
 import { mockMoviesRepository } from './mockMoviesRepository';
 import { tmdbMoviesRepository } from './tmdbMoviesRepository';
 
-export const moviesRepository: MoviesRepository = apiConfig.useMockData
+export const moviesRepository: MoviesRepository = appConfig.useMockData
   ? mockMoviesRepository
   : tmdbMoviesRepository;
 

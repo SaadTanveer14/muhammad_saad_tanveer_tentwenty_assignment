@@ -38,7 +38,7 @@ function findMovie(id: number) {
 }
 
 export const mockMoviesRepository: MoviesRepository = {
-  async getUpcoming(page, signal) {
+  async getUpcoming({ page }, signal) {
     await mockDelay(signal);
     return paginate(
       mockMovies.map(m => toListMovie(m.detail)),
