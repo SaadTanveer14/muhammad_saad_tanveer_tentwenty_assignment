@@ -76,3 +76,8 @@ src/
 4. Search — race-condition test first, then hook + screen
 5. Seat map — reducer + layout generator, then UI + gestures
 6. Polish — orientation/tablet, accessibility, Maestro E2E
+
+
+
+
+Testing Update
