@@ -2,59 +2,11 @@ import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 
 import { server } from '../../../test/msw/server';
-import { TMDB } from '../../../test/msw/handlers';
 import { ApiError } from '../errors';
-import { buildUrl, createHttpClient, get } from '../httpClient';
-
-const schema = z.object({ ok: z.boolean() });
-
-describe('httpClient.get (legacy, TMDb-specific)', () => {
-  it('sends the bearer token and returns validated data', async () => {
-    let auth: string | null = null;
-    server.use(
-      http.get(`${TMDB}/ping`, ({ request }) => {
-        auth = request.headers.get('Authorization');
-        return HttpResponse.json({ ok: true });
-      }),
-    );
-
-    await expect(get('/ping', { schema })).resolves.toEqual({ ok: true });
-    expect(auth).toBe('Bearer test-token');
-  });
-
-  it('throws an http ApiError with the status for non-2xx responses', async () => {
-    server.use(
-      http.get(`${TMDB}/ping`, () => new HttpResponse(null, { status: 404 })),
-    );
-
-    await expect(get('/ping', { schema })).rejects.toMatchObject({
-      kind: 'http',
-      status: 404,
-    });
-  });
-
-  it('throws a parse ApiError when the response shape is wrong', async () => {
-    server.use(http.get(`${TMDB}/ping`, () => HttpResponse.json({ ok: 'yes' })));
-
-    const error = await get('/ping', { schema }).catch(e => e);
-    expect(error).toBeInstanceOf(ApiError);
-    expect(error.kind).toBe('parse');
-  });
-
-  it('throws a network ApiError when the request cannot be made', async () => {
-    server.use(http.get(`${TMDB}/ping`, () => HttpResponse.error()));
-
-    await expect(get('/ping', { schema })).rejects.toMatchObject({
-      kind: 'network',
-    });
-  });
-});
-
-// --- The new generic client -------------------------------------------------
-// Not tied to TMDb: base URL, headers and error-body parsing are all
-// supplied by the caller. Feature API modules will move onto this.
+import { buildUrl, createHttpClient } from '../httpClient';
 
 const BASE = 'https://api.example.com/v1';
+const schema = z.object({ ok: z.boolean() });
 const ping = { path: '/ping', schema };
 
 const client = createHttpClient({
@@ -68,7 +20,9 @@ const client = createHttpClient({
 
 describe('buildUrl', () => {
   it('joins base and path with exactly one slash', () => {
-    expect(buildUrl('https://a.b/3/', '/movie/1')).toBe('https://a.b/3/movie/1');
+    expect(buildUrl('https://a.b/3/', '/movie/1')).toBe(
+      'https://a.b/3/movie/1',
+    );
     expect(buildUrl('https://a.b/3', 'movie/1')).toBe('https://a.b/3/movie/1');
   });
 
@@ -120,7 +74,9 @@ describe('createHttpClient', () => {
   });
 
   it('treats an error body as a failure even with a 200 status', async () => {
-    server.use(http.get(`${BASE}/ping`, () => HttpResponse.json({ error: 'Nope' })));
+    server.use(
+      http.get(`${BASE}/ping`, () => HttpResponse.json({ error: 'Nope' })),
+    );
 
     await expect(client.request(ping)).rejects.toMatchObject({
       kind: 'http',
@@ -129,7 +85,9 @@ describe('createHttpClient', () => {
   });
 
   it('throws a parse error when the shape is wrong', async () => {
-    server.use(http.get(`${BASE}/ping`, () => HttpResponse.json({ ok: 'yes' })));
+    server.use(
+      http.get(`${BASE}/ping`, () => HttpResponse.json({ ok: 'yes' })),
+    );
 
     const error = await client.request(ping).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiError);
@@ -139,13 +97,19 @@ describe('createHttpClient', () => {
   it('throws a network error when the request cannot be made', async () => {
     server.use(http.get(`${BASE}/ping`, () => HttpResponse.error()));
 
-    await expect(client.request(ping)).rejects.toMatchObject({ kind: 'network' });
+    await expect(client.request(ping)).rejects.toMatchObject({
+      kind: 'network',
+    });
   });
 
   it('never puts credentials in error messages', async () => {
-    server.use(http.get(`${BASE}/ping`, () => new HttpResponse(null, { status: 401 })));
+    server.use(
+      http.get(`${BASE}/ping`, () => new HttpResponse(null, { status: 401 })),
+    );
 
-    const error = (await client.request(ping).catch((e: unknown) => e)) as ApiError;
+    const error = (await client
+      .request(ping)
+      .catch((e: unknown) => e)) as ApiError;
     expect(error.message).not.toContain('secret');
   });
 });

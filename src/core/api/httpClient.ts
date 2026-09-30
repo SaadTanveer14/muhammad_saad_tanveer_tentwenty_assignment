@@ -1,6 +1,5 @@
 import type { ZodType } from 'zod';
 
-import { apiConfig } from './config';
 import { ApiError } from './errors';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -12,8 +11,7 @@ export type QueryParams = Record<
 
 /**
  * A request described as data: what to call and how to validate the answer.
- * API modules build these; the client executes them. This is the shape
- * every future API integration (not just TMDb) should target.
+ * API modules build these; the client executes them.
  */
 export interface Endpoint<T> {
   method?: HttpMethod;
@@ -83,10 +81,6 @@ async function readJson(response: Response): Promise<unknown> {
  * Generic JSON client: every response is validated, and every failure is an
  * `ApiError` (`network` | `http` | `parse` | `aborted`). Headers are never
  * included in errors, so credentials can't leak into logs.
- *
- * This replaces the TMDb-specific `get()` below; call sites will move over
- * incrementally, and the legacy function will be deleted once nothing uses
- * it (see the commit that retires it).
  */
 export function createHttpClient(config: HttpClientConfig): HttpClient {
   return {
@@ -141,61 +135,3 @@ export function createHttpClient(config: HttpClientConfig): HttpClient {
     },
   };
 }
-
-// --- Legacy TMDb-specific client -------------------------------------------
-// Pre-dates `createHttpClient`. Existing call sites still use this; new ones
-// should use `createHttpClient` instead. Deleted once nothing calls it.
-
-export interface RequestOptions<T> {
-  schema: ZodType<T>;
-  params?: QueryParams;
-  signal?: AbortSignal;
-}
-
-/**
- * GET a TMDb resource and validate it against `schema`.
- */
-export async function get<T>(
-  path: string,
-  { schema, params, signal }: RequestOptions<T>,
-): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(buildUrl(apiConfig.baseUrl, path, params), {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${apiConfig.readToken}`,
-      },
-      signal,
-    });
-  } catch (cause) {
-    if (signal?.aborted) {
-      throw new ApiError('aborted', 'Request was cancelled', { cause });
-    }
-    throw new ApiError('network', 'Network request failed', { cause });
-  }
-
-  if (!response.ok) {
-    throw new ApiError('http', `Request failed with ${response.status}`, {
-      status: response.status,
-    });
-  }
-
-  let json: unknown;
-  try {
-    json = await response.json();
-  } catch (cause) {
-    throw new ApiError('parse', 'Response was not valid JSON', { cause });
-  }
-
-  const result = schema.safeParse(json);
-  if (!result.success) {
-    throw new ApiError('parse', `Unexpected response shape for ${path}`, {
-      cause: result.error,
-    });
-  }
-  return result.data;
-}
-
-export const httpClient = { get };
