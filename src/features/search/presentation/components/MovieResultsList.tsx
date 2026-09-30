@@ -19,6 +19,8 @@ export interface MovieResultsListProps {
   movies: Movie[];
   onOpen: (movie: Movie) => void;
   header?: ReactElement;
+  /** Load the next page; the list asks early so scrolling stays smooth. */
+  onEndReached?: () => void;
 }
 
 /** Result rows (screens 03 and 04); two columns on wide layouts. */
@@ -26,6 +28,7 @@ export function MovieResultsList({
   movies,
   onOpen,
   header,
+  onEndReached,
 }: MovieResultsListProps) {
   const [width, onLayout] = useLayoutWidth();
   const columns = width >= TWO_COLUMN_MIN_WIDTH ? 2 : 1;
@@ -41,6 +44,8 @@ export function MovieResultsList({
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         ListHeaderComponent={header}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.8}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <View style={styles.cell}>

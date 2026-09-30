@@ -19,7 +19,16 @@ export function SearchResultsScreen({
   route,
 }: WatchStackScreenProps<'SearchResults'>) {
   const params = route.params;
-  const { data, isPending, isError, refetch } = useSearchResults(params);
+  const {
+    movies,
+    totalResults,
+    isPending,
+    isError,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useSearchResults(params);
   const subject = 'genreId' in params ? params.genreName : `“${params.query}”`;
 
   const openMovie = useCallback(
@@ -27,7 +36,7 @@ export function SearchResultsScreen({
     [navigation],
   );
 
-  const count = data?.totalResults ?? 0;
+  const count = totalResults;
   const title = isPending
     ? 'Searching…'
     : `${count} ${count === 1 ? 'Result' : 'Results'} Found`;
@@ -46,7 +55,15 @@ export function SearchResultsScreen({
       />
     );
   } else {
-    body = <MovieResultsList movies={data.results} onOpen={openMovie} />;
+    body = (
+      <MovieResultsList
+        movies={movies}
+        onOpen={openMovie}
+        onEndReached={() =>
+          hasNextPage && !isFetchingNextPage && fetchNextPage()
+        }
+      />
+    );
   }
 
   return (

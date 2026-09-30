@@ -25,7 +25,7 @@ export function useMovieSearch(input: string) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: searchKeys.term(term),
+    queryKey: searchKeys.livePage(term),
     queryFn: ({ signal }) => searchRepository.search(term, 1, signal),
     enabled: term.length > 0 && isOnline,
     staleTime: cachePolicy.search.staleTime,
