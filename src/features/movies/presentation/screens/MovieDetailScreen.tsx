@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { RootStackScreenProps } from '../../../../app/navigation/types';
 import { formatLongDate, toIsoDate } from '../../../../core/format';
 import { useResponsive } from '../../../../core/layout';
+import { useIsOnline } from '../../../../core/network';
 import { colors, spacing } from '../../../../core/theme';
 import {
   AppHeader,
@@ -44,7 +45,12 @@ export function MovieDetailScreen({
   const insets = useSafeAreaInsets();
   const detail = useMovieDetail(movieId);
   const trailer = useMovieTrailer(movieId);
+  const isOnline = useIsOnline();
   const movie = detail.data;
+  // Offline, queries pause instead of failing, so `isPending` never ends on
+  // its own. Only treat pending as "loading" while a request can progress.
+  const trailerLoading = trailer.isPending && isOnline;
+  const trailerOffline = trailer.isPending && !isOnline;
 
   const header = (
     <AppHeader
@@ -60,6 +66,12 @@ export function MovieDetailScreen({
         {header}
         {detail.isError ? (
           <StateView state="error" onRetry={detail.refetch} />
+        ) : !isOnline ? (
+          <StateView
+            state="offline"
+            message="Connect to the internet to load this movie."
+            onRetry={detail.refetch}
+          />
         ) : (
           <DetailSkeleton />
         )}
@@ -71,7 +83,8 @@ export function MovieDetailScreen({
     <Hero
       movie={movie}
       trailerAvailable={Boolean(trailer.data)}
-      trailerLoading={trailer.isPending}
+      trailerLoading={trailerLoading}
+      trailerOffline={trailerOffline}
       onGetTickets={() => navigation.navigate('Showtimes', { movieId })}
       onWatchTrailer={() =>
         trailer.data &&
@@ -82,7 +95,9 @@ export function MovieDetailScreen({
       }
     />
   );
-  const info = <Info movie={movie} loadingGenres={detail.isPlaceholderData} />;
+  const info = (
+    <Info movie={movie} loadingGenres={detail.isPlaceholderData && isOnline} />
+  );
 
   return (
     <View style={styles.root} testID="movie-detail-screen">
@@ -118,12 +133,14 @@ function Hero({
   movie,
   trailerAvailable,
   trailerLoading,
+  trailerOffline,
   onGetTickets,
   onWatchTrailer,
 }: {
   movie: MovieDetail;
   trailerAvailable: boolean;
   trailerLoading: boolean;
+  trailerOffline: boolean;
   onGetTickets: () => void;
   onWatchTrailer: () => void;
 }) {
@@ -191,7 +208,9 @@ function Hero({
               style={styles.center}
               testID="no-trailer"
             >
-              No trailer available
+              {trailerOffline
+                ? 'Trailer unavailable offline'
+                : 'No trailer available'}
             </AppText>
           )}
         </View>

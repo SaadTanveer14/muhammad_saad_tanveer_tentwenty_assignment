@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 
 import type { WatchStackScreenProps } from '../../../../app/navigation/types';
+import { useIsOnline } from '../../../../core/network';
 import {
   AppHeader,
   OfflineBanner,
@@ -29,6 +30,7 @@ export function SearchResultsScreen({
     isFetchingNextPage,
     fetchNextPage,
   } = useSearchResults(params);
+  const isOnline = useIsOnline();
   const subject = 'genreId' in params ? params.genreName : `“${params.query}”`;
 
   const openMovie = useCallback(
@@ -38,11 +40,23 @@ export function SearchResultsScreen({
 
   const count = totalResults;
   const title = isPending
-    ? 'Searching…'
+    ? isOnline
+      ? 'Searching…'
+      : 'Results'
     : `${count} ${count === 1 ? 'Result' : 'Results'} Found`;
 
   let body: React.ReactNode;
-  if (isPending) {
+  if (isPending && !isOnline) {
+    // Offline with nothing cached: the query is paused, not failed, so say
+    // so instead of showing skeletons indefinitely. It resumes on reconnect.
+    body = (
+      <StateView
+        state="offline"
+        message="Connect to the internet to see these results."
+        onRetry={refetch}
+      />
+    );
+  } else if (isPending) {
     body = <MovieResultsSkeleton />;
   } else if (isError) {
     body = <StateView state="error" onRetry={refetch} />;
