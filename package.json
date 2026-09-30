@@ -12,7 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "e2e": "maestro test .maestro",
-    "pods": "cd ios && bundle exec pod install"
+    "pods": "cd ios && bundle exec pod install",
+    "tmdb:smoke": "node scripts/tmdb-smoke.mjs"
   },
   "dependencies": {
     "@d11/react-native-fast-image": "^8.13.0",
