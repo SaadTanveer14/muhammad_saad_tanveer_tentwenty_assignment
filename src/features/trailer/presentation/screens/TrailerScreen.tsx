@@ -15,6 +15,35 @@ import { colors, spacing } from '../../../../core/theme';
 import { AppText, Button, IconButton } from '../../../../core/ui';
 
 /**
+ * Starts playback from inside the player page as soon as YouTube's player is
+ * ready. The library's own `play` prop sends an app→page message, which
+ * never takes effect:
+ * - its hosted player page compares the raw message to "playVideo", but the
+ *   library sends JSON (`{"eventName":"playVideo"}`) — so nothing matches on
+ *   either platform;
+ * - on Android, react-native-webview dispatches the message on `document`
+ *   without bubbling, while the page listens on `window`.
+ * `player` is the page's global YT.Player instance; `playVideo` only exists
+ * once it's ready, so poll briefly and stop after the first call.
+ */
+const AUTOPLAY_SCRIPT = `
+(function () {
+  var tries = 0;
+  var timer = setInterval(function () {
+    tries += 1;
+    var p = window.player;
+    if (p && typeof p.playVideo === 'function') {
+      p.playVideo();
+      clearInterval(timer);
+    } else if (tries > 80) {
+      clearInterval(timer);
+    }
+  }, 250);
+})();
+true;
+`;
+
+/**
  * Full-screen trailer. Autoplays, returns to the detail screen when the
  * video ends, and can be left at any time (close button, Android back,
  * iOS swipe). Errors and offline show a message with Back, never black.
@@ -82,6 +111,7 @@ export function TrailerScreen({
             webViewProps={{
               allowsInlineMediaPlayback: true,
               mediaPlaybackRequiresUserAction: false,
+              injectedJavaScript: AUTOPLAY_SCRIPT,
             }}
           />
           {!ready ? (

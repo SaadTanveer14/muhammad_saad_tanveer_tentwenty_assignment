@@ -54,6 +54,7 @@ jest.mock('react-native-youtube-iframe', () => {
       onChangeState: props.onChangeState,
       onError: props.onError,
       onReady: props.onReady,
+      webViewProps: props.webViewProps,
     });
   }
   return { __esModule: true, default: YoutubePlayer, PLAYER_STATES };
