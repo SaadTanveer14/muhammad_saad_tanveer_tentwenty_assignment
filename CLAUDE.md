@@ -16,6 +16,7 @@ npm run format                             # prettier on src/
 npm run pods                               # iOS: bundle exec pod install
 npm run android | npm run ios              # build + run
 npm run e2e                                # Maestro flows in .maestro/
+npm run tmdb:smoke                         # live-call every TMDb operation with the .env token
 ```
 
 Android build without a device: `cd android && ./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a`.
@@ -33,9 +34,15 @@ Feature-first clean architecture under `src/`, with dependency rule `presentatio
 
 Key conventions spanning multiple files:
 
-- **Repositories:** each feature's `domain/` declares a repository interface; `data/index.ts` exports the instance, picking the mock or TMDb implementation from `apiConfig.useMockData` (`USE_MOCK_DATA` in `.env`, default true). Showtimes and seating are mock-only (no booking API). Hooks in `presentation/hooks` wrap repositories in TanStack Query; screens call hooks only.
-- **API boundary:** `core/api/httpClient.get(path, { schema, params, signal })` validates every response with a zod schema and throws `ApiError` with `kind: 'network' | 'http' | 'parse' | 'aborted'`. Raw TMDb shapes (`poster_path`, …) live only in `features/*/data/dto.ts`; `mappers.ts` converts to domain types (empty strings → `null`). Screens never see DTOs. Search reuses the movies DTO/mappers.
-- **Query keys** are factories in `features/*/data/queryKeys.ts`. The first key segment matters: `queryClient.ts` persists `['search', …]` entries for only 1 day vs 7 days for everything else. Search terms must go through `normaliseTerm()` before being used in a key.
+- **API layers (generic → specific):**
+  - `core/api/httpClient.ts` — `createHttpClient({ baseUrl, headers, parseServerError })`, API-agnostic. Requests are data: `Endpoint<T> = { method?, path, params?, body?, schema }`. Every response is zod-validated; every failure is an `ApiError` (`network | http | parse | aborted`, plus `status`/`code`). Headers never appear in errors.
+  - `services/tmdb/` — the **only** place TMDb specifics live: `config.ts` (base URLs, token from `.env`, fixed params like `include_adult`, `sort_by`, `with_release_type`, image sizes), `client.ts` (the configured client + TMDb error-body parsing), `endpoints.ts` (the six spec operations as `Endpoint` factories; callers pass only page/query/dates/movie id), `schemas.ts` (response DTOs), `images.ts` (`buildImageUrl`, slash-normalised, `null` for missing paths), `genres.ts` (static genre id→name; there's no genre endpoint in the contract).
+  - `core/config/appConfig.ts` — app-owned values: `language` (in every request and cache key), `useMockData`, `upcomingWindowDays`.
+  - Don't put URLs, param names or constants in features — add them to `services/tmdb` or `appConfig`.
+- **Repositories:** each feature's `domain/` declares an interface; `data/index.ts` picks the mock or TMDb implementation via `appConfig.useMockData` (`USE_MOCK_DATA` in `.env`). TMDb repos are thin: `tmdbClient.request(tmdbEndpoints.x(...), signal)` → mapper. Movie detail fetches details + images in parallel and tolerates an images failure. Showtimes and seating are mock-only (no booking API). Hooks wrap repositories in TanStack Query; screens call hooks only.
+- **API contract:** `Movie_DB_API_AGENT_SPEC` (kept outside the repo). Upcoming = `/discover/movie` with a release-date window (not `/movie/upcoming`); only documented fields are used (so no title logos).
+- **API boundary:** Raw TMDb shapes (`poster_path`, …) live only in `services/tmdb/schemas.ts`; `features/movies/data/mappers.ts` converts them to domain types (empty strings → `null`). Screens never see DTOs.
+- **Query keys** are factories in `features/*/data/queryKeys.ts` and include every input that changes a response (language, page, date window). The first segment matters: `queryClient.ts` persists `['search', …]` for 1 day vs 7 days otherwise. Live search (`livePage`, one page) and the results screen (`results`, infinite) use different keys because the cached shapes differ. Search terms go through `normaliseTerm()` first.
 - **Offline:** `networkMode: 'online'` means queries pause (not fail) while offline. Use `useIsOnline()` / `OfflineBanner` for cached-content-while-offline, and `StateView state="offline"` when there is no cache. Every non-content state goes through `StateView` (`loading | empty | error | offline`).
 - **Styling:** all spacing/colors/radii/typography come from `core/theme` tokens (4pt grid); text uses `AppText` with a `variant`. **`DESIGN_SYSTEM.md` is the design reference** (Figma node IDs, token tables, per-component specs) — follow it for any UI work and update it alongside `core/theme`. Font is Poppins (`assets/fonts`, linked via `npx react-native-asset`); pick weight with `fontFamily.*`, never `fontWeight`.
 - **Seat map:** one pure `SeatGrid` renders both the preview on `ShowtimeCard` and the interactive map; `SeatMap` adds pinch/pan (Gesture Handler 3 hooks + Reanimated, clamped in a worklet), ± buttons and the scroll indicator. Seat size comes from `seatMetrics()` (fits the available width). The hall shape comes from `createSeatLayout()` (pure, deterministic per seed); selection is `seatSelectionReducer`.
