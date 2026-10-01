@@ -107,7 +107,13 @@ export function TrailerScreen({
             onReady={() => setReady(true)}
             onError={() => setFailed(true)}
             onChangeState={onChangeState}
-            initialPlayerParams={{ modestbranding: true, rel: false }}
+            initialPlayerParams={{
+              modestbranding: true,
+              rel: false,
+              // Already full screen in landscape: hide YouTube's own
+              // full-screen (rotate) button.
+              preventFullScreen: true,
+            }}
             webViewProps={{
               allowsInlineMediaPlayback: true,
               mediaPlaybackRequiresUserAction: false,
