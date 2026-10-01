@@ -1,0 +1,4 @@
+I created my second mind with all the documentation using obsidean and all the mistakes i made and oneshot the flutter application
+is another thing i just wanted implement and learn during this project.
+
+https://github.com/SaadTanveer14/cinebook_flutter

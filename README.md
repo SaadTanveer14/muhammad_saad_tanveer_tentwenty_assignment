@@ -3,11 +3,33 @@
 React Native (TypeScript, New Architecture) app that lists upcoming movies from
 TMDb and carries the user through to seat selection.
 
+## Deliverables
+
+| Item | Link |
+|---|---|
+| GitHub repo | [muhammad_saad_tanveer_tentwenty_assignment (`api_integrations`)](https://github.com/SaadTanveer14/muhammad_saad_tanveer_tentwenty_assignment/tree/api_integrations) |
+| Demo screen recording | [Google Drive](https://drive.google.com/file/d/1XVewe78BcX0MeNwzcEZhI3Nr5WVvW1Ve/view?usp=drive_link) |
+| Installable build (APK) | [Google Drive](https://drive.google.com/file/d/13pPLU5UeeGLDgZZYmxgOZjsDhFhk5Mx_/view?usp=sharing) |
+| Code structure walkthrough | [Google Drive](https://drive.google.com/file/d/1cpbclm_hHt-kobbxKFZYlKG48kcJPtdx/view?usp=sharing) |
+| How I work | [Google Drive](https://drive.google.com/file/d/1vPZloIiju63fqhcENFJ5y0RyoA10Ztzf/view?usp=sharing) |
+
+## Repository layout
+
+```
+CineBook/
+├── README.md       this file
+└── source/         the React Native project (package.json, src/, ios/, android/, docs)
+```
+
+All commands below run from `source/`. Paths in this README (`src/…`,
+`.maestro/`, `jest.config.js`) are relative to `source/`.
+
 ## Getting started
 
 Prerequisites: Node 22.13+ / 24 LTS, JDK 17, Android SDK 36, Xcode + CocoaPods.
 
 ```bash
+cd source
 npm install
 cp .env.example .env          # then set TMDB_READ_TOKEN (TMDb v4 read access token)
 npm run pods                  # iOS only

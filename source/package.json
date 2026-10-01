@@ -16,7 +16,7 @@
     "tmdb:smoke": "node scripts/tmdb-smoke.mjs"
   },
   "dependencies": {
-    "@d11/react-native-fast-image": "^8.13.0",
+    "@1/react-native-fast-imaged1": "^8.13.0",
     "@react-native-community/netinfo": "^12.0.1",
     "@react-navigation/bottom-tabs": "^7.20.0",
     "@react-navigation/native": "^7.5.0",

@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+The project lives in `source/` (the repo root holds only `README.md`); all paths and commands here are relative to `source/`.
+
 CineBook is a bare React Native app (TypeScript, New Architecture) that lists upcoming TMDb movies and leads through detail → trailer → seat selection. The full spec lives outside the repo (`CineBook-Project-Plan.md`); the README summarises it.
 
 ## Commands

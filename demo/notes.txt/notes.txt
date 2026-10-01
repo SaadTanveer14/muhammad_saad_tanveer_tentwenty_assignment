@@ -1,0 +1,5 @@
+Start with the api flow of the data error and success states
+implement the project structure and architecture and caching strategy
+implement the UI design define Design system and then go from there
+implement ui from figma
+now connect the apis with the whole flow
