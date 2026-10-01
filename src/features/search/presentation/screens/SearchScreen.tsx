@@ -1,5 +1,13 @@
-import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Keyboard,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  type TextInput,
+  View,
+} from 'react-native';
 
 import type { WatchStackScreenProps } from '../../../../app/navigation/types';
 import { colors, spacing } from '../../../../core/theme';
@@ -24,7 +32,12 @@ import { useCategories, useMovieSearch } from '../hooks';
 
 export function SearchScreen({ navigation }: WatchStackScreenProps<'Search'>) {
   const [input, setInput] = useState('');
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<TextInput>(null);
   const search = useMovieSearch(input);
+  // While the keyboard is up the tab bar is hidden and this screen has no
+  // back button, so searching needs its own explicit way out.
+  const isSearching = focused || input.length > 0;
 
   const openMovie = useCallback(
     (movie: Movie) => navigation.navigate('MovieDetail', { movieId: movie.id }),
@@ -38,6 +51,17 @@ export function SearchScreen({ navigation }: WatchStackScreenProps<'Search'>) {
       }),
     [navigation],
   );
+  /** End the search: clear it, close the keyboard, back to the Watch list. */
+  const cancel = () => {
+    setInput('');
+    inputRef.current?.blur();
+    Keyboard.dismiss();
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('WatchHome');
+    }
+  };
   const submit = () => {
     if (search.term) {
       navigation.navigate('SearchResults', { query: search.term });
@@ -47,13 +71,32 @@ export function SearchScreen({ navigation }: WatchStackScreenProps<'Search'>) {
   const header = (
     <AppHeader>
       <View style={styles.field}>
-        <SearchField
-          value={input}
-          onChangeText={setInput}
-          returnKeyType="go"
-          onSubmitEditing={submit}
-          testID="search-input"
-        />
+        <View style={styles.fieldInput}>
+          <SearchField
+            ref={inputRef}
+            value={input}
+            onChangeText={setInput}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            returnKeyType="go"
+            onSubmitEditing={submit}
+            testID="search-input"
+          />
+        </View>
+        {isSearching ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Cancel search"
+            hitSlop={8}
+            onPress={cancel}
+            style={({ pressed }) => pressed && styles.pressed}
+            testID="cancel-search"
+          >
+            <AppText variant="button" color={colors.primary}>
+              Cancel
+            </AppText>
+          </Pressable>
+        ) : null}
       </View>
     </AppHeader>
   );
@@ -145,7 +188,15 @@ function CategoryGrid({ onOpen }: { onOpen: (category: Category) => void }) {
 }
 
 const styles = StyleSheet.create({
-  field: { paddingTop: spacing.sm, paddingBottom: spacing.lg },
+  field: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.lg,
+  },
+  fieldInput: { flex: 1 },
+  pressed: { opacity: 0.6 },
   grid: {
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xxxl - spacing.xs,
