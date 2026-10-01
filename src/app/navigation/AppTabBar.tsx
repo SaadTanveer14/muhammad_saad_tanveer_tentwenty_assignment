@@ -58,6 +58,10 @@ export function AppTabBar({
           ? [
               styles.rail,
               {
+                // The rail sits over the left safe area (e.g. the camera
+                // cutout when the phone is rotated left): grow by that inset
+                // instead of squeezing the tabs into the fixed width.
+                width: RAIL_WIDTH + insets.left,
                 paddingTop: insets.top + spacing.xxxl,
                 paddingLeft: insets.left,
               },
