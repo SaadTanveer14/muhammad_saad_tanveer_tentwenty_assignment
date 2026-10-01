@@ -5,7 +5,6 @@ import { WatchHomeScreen } from '../../features/movies/presentation/screens/Watc
 import { SearchResultsScreen } from '../../features/search/presentation/screens/SearchResultsScreen';
 import { SearchScreen } from '../../features/search/presentation/screens/SearchScreen';
 import { colors } from '../../core/theme';
-import { defaultOrientation } from './orientation';
 import type { WatchStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<WatchStackParamList>();
@@ -17,7 +16,6 @@ export function WatchStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
-        orientation: defaultOrientation,
       }}
     >
       <Stack.Screen name="WatchHome" component={WatchHomeScreen} />

@@ -6,7 +6,7 @@ import { SeatMapScreen } from '../../features/seating/presentation/screens/SeatM
 import { ShowtimesScreen } from '../../features/showtimes/presentation/screens/ShowtimesScreen';
 import { TrailerScreen } from '../../features/trailer/presentation/screens/TrailerScreen';
 import { colors } from '../../core/theme';
-import { defaultOrientation, trailerOrientation } from './orientation';
+import { trailerOrientation } from './orientation';
 import { Tabs } from './Tabs';
 import type { RootStackParamList } from './types';
 
@@ -20,7 +20,6 @@ export function RootStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
-        orientation: defaultOrientation,
       }}
     >
       <Stack.Screen name="Tabs" component={Tabs} />
