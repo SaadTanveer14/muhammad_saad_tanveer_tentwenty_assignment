@@ -48,6 +48,11 @@ export const colors = {
   skeleton: palette.grey100,
   /** Seat-map pan indicator. */
   scrollbar: '#B6B8C4',
+  /** Launch screen; keep in sync with android res/values/colors.xml and
+   * the iOS LaunchScreen.storyboard. */
+  splashBackground: '#0C0F17',
+  /** Warm glow behind the splash mark (the logo's orange). */
+  splashGlow: '#F2643A',
   /** Hero image gradients (transparent → black). */
   gradientEnd: palette.black,
   /** Genre tag backgrounds, cycled by index. */
