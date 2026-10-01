@@ -68,5 +68,18 @@
   },
   "engines": {
     "node": ">= 22.11.0"
+  },
+  "codegenConfig": {
+    "name": "CineBookSpecs",
+    "type": "modules",
+    "jsSrcsDir": "src/native",
+    "android": {
+      "javaPackageName": "com.cinebook.specs"
+    },
+    "ios": {
+      "modulesProvider": {
+        "InterfaceOrientation": "RCTInterfaceOrientation"
+      }
+    }
   }
 }

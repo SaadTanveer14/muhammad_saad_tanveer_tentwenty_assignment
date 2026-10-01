@@ -12,6 +12,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2B2BA854E0DE4F83992BC4AC /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 829CCE5886FA4AD797A2E7AC /* Poppins-SemiBold.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		7B69CA2BAC06FBA5CA55132A /* RCTInterfaceOrientation.mm in Sources */ = {isa = PBXBuildFile; fileRef = 713D27AA68D5936D7EB57850 /* RCTInterfaceOrientation.mm */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		96BBAE97167E43DB857447AA /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CB79CD3600E40428D87F8E5 /* Poppins-Regular.ttf */; };
 		BC1F0D5EF13FC6D90A917D7C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
@@ -23,9 +24,11 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = CineBook/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = CineBook/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = CineBook/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		3028BB548D1B97EE03FBEEBA /* RCTInterfaceOrientation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = RCTInterfaceOrientation.h; path = CineBook/RCTInterfaceOrientation.h; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-CineBook.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CineBook.debug.xcconfig"; path = "Target Support Files/Pods-CineBook/Pods-CineBook.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-CineBook.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CineBook.release.xcconfig"; path = "Target Support Files/Pods-CineBook/Pods-CineBook.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-CineBook.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CineBook.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		713D27AA68D5936D7EB57850 /* RCTInterfaceOrientation.mm */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.cpp.objcpp; name = RCTInterfaceOrientation.mm; path = CineBook/RCTInterfaceOrientation.mm; sourceTree = "<group>"; };
 		74084BEAB9D04E049207C0BB /* Poppins-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Medium.ttf"; path = "../assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = CineBook/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = CineBook/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -55,6 +58,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				3028BB548D1B97EE03FBEEBA /* RCTInterfaceOrientation.h */,
+				713D27AA68D5936D7EB57850 /* RCTInterfaceOrientation.mm */,
 			);
 			name = CineBook;
 			sourceTree = "<group>";
@@ -272,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				7B69CA2BAC06FBA5CA55132A /* RCTInterfaceOrientation.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -4,6 +4,7 @@ import { Keyboard, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText, Icon, type IconName } from '../../core/ui';
+import { useRailLeftInset } from '../../core/layout';
 import { colors, fontFamily, radii, spacing } from '../../core/theme';
 import type { TabParamList } from './types';
 
@@ -15,6 +16,19 @@ const TABS: Record<keyof TabParamList, { label: string; icon: IconName }> = {
 };
 
 export const RAIL_WIDTH = 96;
+
+/**
+ * Space under the tab items. On iPhone the design lets the bar extend under
+ * the thin home indicator, so part of that inset is reclaimed. Android's
+ * navigation area can be a 48-dp row of back/home/recents buttons that
+ * must never be covered, so the full inset is kept there.
+ */
+function barBottomPadding(bottomInset: number): number {
+  if (Platform.OS === 'android') {
+    return bottomInset + spacing.sm;
+  }
+  return Math.max(bottomInset - spacing.lg, spacing.md);
+}
 
 function useKeyboardVisible() {
   const [visible, setVisible] = useState(false);
@@ -43,6 +57,7 @@ export function AppTabBar({
   rail = false,
 }: BottomTabBarProps & { rail?: boolean }) {
   const insets = useSafeAreaInsets();
+  const railLeftInset = useRailLeftInset();
   const keyboardVisible = useKeyboardVisible();
 
   // Android resizes the window for the keyboard; keep the bar out of the way.
@@ -61,15 +76,15 @@ export function AppTabBar({
                 // The rail sits over the left safe area (e.g. the camera
                 // cutout when the phone is rotated left): grow by that inset
                 // instead of squeezing the tabs into the fixed width.
-                width: RAIL_WIDTH + insets.left,
+                width: RAIL_WIDTH + railLeftInset,
                 paddingTop: insets.top + spacing.xxxl,
-                paddingLeft: insets.left,
+                paddingLeft: railLeftInset,
               },
             ]
           : [
               styles.bar,
               {
-                paddingBottom: Math.max(insets.bottom - spacing.lg, spacing.md),
+                paddingBottom: barBottomPadding(insets.bottom),
                 paddingLeft: insets.left,
                 paddingRight: insets.right,
               },
