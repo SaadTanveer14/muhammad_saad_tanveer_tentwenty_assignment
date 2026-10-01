@@ -34,6 +34,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
+  /// Paint the React root with the launch-screen colour (#0C0F17) so nothing
+  /// flashes white between LaunchScreen.storyboard and the JS AnimatedSplash.
+  override func customize(_ rootView: RCTRootView) {
+    super.customize(rootView)
+    rootView.backgroundColor = UIColor(
+      red: 12.0 / 255.0, green: 15.0 / 255.0, blue: 23.0 / 255.0, alpha: 1)
+  }
+
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     self.bundleURL()
   }
