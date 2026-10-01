@@ -27,8 +27,15 @@ const WORDMARK = { uri: 'splash_wordmark' };
 /** Same size as the native launch-screen mark, so the hand-off is seamless. */
 const MARK_SIZE = { width: 128, height: 126 };
 const WORDMARK_SIZE = { width: 183, height: 34 };
-/** How far the mark rises to make room for the wordmark below it. */
-const MARK_RISE = (WORDMARK_SIZE.height + spacing.xl) / 2;
+/** Space between the mark and the wordmark once both are shown. */
+const LOGO_GAP = spacing.xxl;
+/**
+ * The mark + gap + wordmark are centred as one group. From the centre, the
+ * mark rises by half of (gap + wordmark) and the wordmark sits half the
+ * mark's height plus half the gap below it — so they never overlap.
+ */
+const MARK_RISE = (WORDMARK_SIZE.height + LOGO_GAP) / 2;
+const WORDMARK_OFFSET = (MARK_SIZE.height + LOGO_GAP) / 2;
 
 /** Timeline (ms). */
 const T = {
@@ -151,7 +158,9 @@ export function AnimatedSplash({ onReady, onFinish }: AnimatedSplashProps) {
   }));
   const wordmarkStyle = useAnimatedStyle(() => ({
     opacity: wordmark.value,
-    transform: [{ translateY: MARK_RISE + (1 - wordmark.value) * spacing.md }],
+    transform: [
+      { translateY: WORDMARK_OFFSET + (1 - wordmark.value) * spacing.md },
+    ],
   }));
 
   return (
