@@ -1,0 +1,4 @@
+<resources>
+    <!-- Keep in sync with colors.splashBackground in src/core/theme/colors.ts -->
+    <color name="splash_background">#0C0F17</color>
+</resources>

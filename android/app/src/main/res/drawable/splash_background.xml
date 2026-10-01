@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch window (Android 7–11, and the gap before JS draws on 12+).
+     The mark is 128dp wide, matching AnimatedSplash, so the hand-off is seamless. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item
+        android:width="128dp"
+        android:height="126dp"
+        android:gravity="center"
+        android:drawable="@drawable/splash_mark" />
+</layer-list>
