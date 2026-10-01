@@ -30,10 +30,15 @@ export function createQueryClient(): QueryClient {
 }
 
 /** Search results are only kept on disk for a day; everything else for a week. */
-function shouldPersistQuery(query: Query): boolean {
+export function shouldPersistQuery(query: Query): boolean {
   // Mock data references bundled images by module id, which changes between
   // bundles, so it must never be written to disk.
   if (appConfig.useMockData) {
+    return false;
+  }
+  // Same for any query whose data embeds bundled images (e.g. the genre
+  // tiles): opt out with `meta: { persist: false }`.
+  if (query.meta?.persist === false) {
     return false;
   }
   if (query.state.status !== 'success') {
@@ -52,6 +57,7 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: cachePolicy.maxAge,
   // Bump when cached data shapes change to discard incompatible caches.
   // Includes the data source so mock data never survives a switch to TMDb.
-  buster: `v3-${appConfig.useMockData ? 'mock' : 'tmdb'}`,
+  // v4: dropped persisted genre tiles that held stale bundled-image ids.
+  buster: `v4-${appConfig.useMockData ? 'mock' : 'tmdb'}`,
   dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
 };

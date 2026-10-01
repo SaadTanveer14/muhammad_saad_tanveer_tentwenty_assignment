@@ -8,5 +8,9 @@ export function useCategories() {
     queryKey: searchKeys.categories(),
     queryFn: ({ signal }) => searchRepository.getCategories(signal),
     staleTime: cachePolicy.detail.staleTime,
+    // The tiles reference bundled artwork by module id, which changes with
+    // every JS bundle; persisting them left blank tiles after an update.
+    // They're local data anyway, so there's nothing to gain from disk.
+    meta: { persist: false },
   });
 }
